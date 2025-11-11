@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>God‑Level Coke‑Inspired Experience</title>
+  <meta name="description" content="Premium brand‑inspired website with parallax, HD/3D imagery, fizz audio, GSAP/Three.js animations, and responsive UI." />
+  <meta name="theme-color" content="#F40009" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <!-- External libs -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.core.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-SmSRN8R8/4QJqGmN4G0nFJBNZyyR8jH4xzyBfZf+4uA=" crossorigin=""></script>
+  <style>
+    /* ==========================
+       THEME TOKENS & RESET
+       ========================== */
+    :root{
+      --coke-red:#F40009; /* brand-inspired primary */
+      --coke-deep:#9b0206; /* shadow/depth */
+      --ink:#0a0a0a;      /* nearly black */
+      --foam:#ffffff;     /* white */
+      --silver:#e6e6e6;   /* light gray */
+      --bg:#0b0b0b;       /* app background */
+      --accent-green:#2ecc71; /* sustainability */
+      --maxw:1200px;
+      --radius-xl:24px;
+      --radius-lg:18px;
+      --radius-md:12px;
+      --shadow-1:0 10px 30px rgba(0,0,0,.25);
+      --shadow-2:0 20px 60px rgba(244,0,9,.25);
+    }
+    *, *::before, *::after{box-sizing:border-box}
+    html, body{height:100%}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; color:var(--foam); background:var(--bg);
+      font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      line-height:1.45; overflow-x:hidden;
+    }
+    img{max-width:100%; display:block}
+    a{color:inherit; text-decoration:none}
+    button{font:inherit}
+    .container{max-width:var(--maxw); margin:0 auto; padding:0 20px}
+
+    /* ==========================
+       ACCESSIBILITY & UTILITIES
+       ========================== */
+    .sr-only{position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .muted{opacity:.85}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid rgba(255,255,255,.2);border-radius:999px;font-size:.85rem}
+    .tag{display:inline-block;padding:.35rem .7rem;border:1px solid rgba(255,255,255,.3);border-radius:999px;font-size:.75rem;letter-spacing:.3px;opacity:.9}
+
+    /* ==========================
+       NAVBAR
+       ========================== */
+    .nav{position:fixed; inset:0 0 auto 0; height:72px; z-index:1000; display:flex; align-items:center; justify-content:space-between; padding:0 16px; backdrop-filter:blur(8px); background:linear-gradient(90deg, rgba(10,10,10,.85), rgba(10,10,10,.45)); border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand{font-family:"Playfair Display", serif; font-weight:900; letter-spacing:.3px}
+    .brand .swash{color:var(--coke-red); text-shadow:0 6px 16px rgba(244,0,9,.4)}
+    .nav ul{list-style:none; display:flex; gap:1.2rem; margin:0; padding:0}
+    .nav a{opacity:.9}
+    .nav a:focus, .nav a:hover{opacity:1}
+    .cta{background:linear-gradient(180deg, var(--coke-red), var(--coke-deep)); color:#fff; border:0; border-radius:999px; padding:.7rem 1.1rem; font-weight:700; box-shadow:0 8px 24px rgba(244,0,9,.45), inset 0 2px 0 rgba(255,255,255,.25); cursor:pointer; position:relative; overflow:hidden}
+    .cta.ghost{background:transparent; border:1px solid rgba(255,255,255,.45); box-shadow:none}
+
+    /* ==========================
+       HERO / PARALLAX
+       ========================== */
+    header.hero{position:relative; height:100svh; display:grid; place-items:center; overflow:hidden}
+    .hero .bg-grad{position:absolute; inset:0; background:
+      radial-gradient(1200px 600px at 10% 90%, rgba(244,0,9,.18), transparent 60%),
+      radial-gradient(800px 500px at 85% 20%, rgba(244,0,9,.22), transparent 60%),
+      linear-gradient(180deg, #0c0c0c, #000)}
+    .hero .parallax{position:absolute; inset:0; pointer-events:none}
+    .layer{position:absolute; will-change:transform; filter:drop-shadow(0 20px 40px rgba(0,0,0,.35))}
+    .hero-content{position:relative; z-index:10; text-align:center; padding:0 20px; max-width:1000px}
+    .headline{font-family:"Playfair Display", serif; font-size:clamp(2.4rem, 6vw, 5rem); line-height:1.02; margin:0 0 .6rem}
+    .sub{font-size:clamp(.95rem, 1.8vw, 1.2rem); opacity:.92; margin:0 auto 1.2rem; max-width:740px}
+
+    /* Canvas particles (fizz) */
+    #fizzCanvas{position:absolute; inset:0; z-index:1; pointer-events:none}
+
+    /* ==========================
+       SECTIONS BASE
+       ========================== */
+    section{padding:110px 0}
+    h2.section-title{margin:0 0 10px; font-size:clamp(1.6rem, 3vw, 2.2rem)}
+    p.section-sub{margin:0 0 24px}
+
+    /* ==========================
+       PRODUCTS GRID
+       ========================== */
+    .filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px}
+    .grid{display:grid; gap:20px}
+    .products{grid-template-columns:repeat(12,1fr)}
+    .card{grid-column:span 4; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius-xl); padding:18px; position:relative; overflow:hidden; transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease}
+    .card:hover{transform:translateY(-6px); box-shadow:var(--shadow-2); border-color:rgba(255,255,255,.22)}
+    .thumb{aspect-ratio:4/3; border-radius:var(--radius-lg); overflow:hidden; margin-bottom:12px; background:linear-gradient(120deg,#191919,#0f0f0f)}
+    .thumb img{width:100%; height:100%; object-fit:cover}
+    .price{opacity:.9}
+    .buy{margin-top:12px}
+
+    @media (max-width: 1024px){ .card{grid-column:span 6} }
+    @media (max-width: 640px){ .card{grid-column:1 / -1} }
+
+    /* Tilt effect */
+    .tilt{transform-style:preserve-3d}
+
+    /* ==========================
+       TIMELINE
+       ========================== */
+    .timeline{position:relative; margin-top:20px}
+    .timeline:before{content:""; position:absolute; left:50%; top:0; bottom:0; width:3px; background:linear-gradient(var(--coke-red), rgba(244,0,9,.3)); transform:translateX(-50%); border-radius:3px}
+    .event{position:relative; display:grid; grid-template-columns:repeat(12,1fr); gap:20px; margin:34px 0}
+    .event .dot{position:absolute; left:50%; top:20px; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%; background:var(--coke-red); box-shadow:0 0 0 6px rgba(244,0,9,.15)}
+    .event .card{grid-column:span 6}
+    .event.left .card{grid-column:1 / span 6}
+    .event.right .card{grid-column:7 / span 6}
+    @media (max-width: 900px){
+      .event .card{grid-column:1 / span 12}
+      .timeline:before{left:24px; transform:none}
+      .event .dot{left:24px; transform:translate(-50%, -50%)}
+      .event{padding-left:26px}
+      .event.right .card{grid-column:1 / span 12}
+    }
+
+    /* ==========================
+       CAMPAIGNS SLIDER (basic)
+       ========================== */
+    .slider{position:relative; border-radius:var(--radius-xl); overflow:hidden; border:1px solid rgba(255,255,255,.1)}
+    .slides{display:flex; transition:transform .6s ease; will-change:transform}
+    .slide{min-width:100%; position:relative; aspect-ratio:16/9; background:#111}
+    .slide video, .slide img{width:100%; height:100%; object-fit:cover}
+    .slider-controls{display:flex; gap:10px; justify-content:center; margin-top:12px}
+
+    /* ==========================
+       SUSTAINABILITY
+       ========================== */
+    .s-card{background:linear-gradient(180deg, rgba(46,204,113,.15), rgba(46,204,113,.04)); border:1px solid rgba(46,204,113,.25); padding:20px; border-radius:var(--radius-xl)}
+    .counter{font-size:2rem; font-weight:800; color:var(--accent-green)}
+
+    /* ==========================
+       CONTACT + MAP
+       ========================== */
+    .contact{display:grid; grid-template-columns:repeat(12,1fr); gap:20px}
+    .contact form{grid-column:span 6; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius-xl); padding:18px}
+    .contact .map{grid-column:span 6; border-radius:var(--radius-xl); overflow:hidden; border:1px solid rgba(255,255,255,.1); min-height:360px}
+    .field{position:relative; margin:12px 0}
+    .field input, .field textarea{width:100%; padding:14px 12px; background:#0f0f0f; color:#fff; border:1px solid rgba(255,255,255,.15); border-radius:12px}
+    .field label{position:absolute; left:12px; top:10px; font-size:.85rem; opacity:.75; transition:all .2s}
+    .field input:focus + label, .field input:not(:placeholder-shown) + label,
+    .field textarea:focus + label, .field textarea:not(:placeholder-shown) + label{top:-10px; left:10px; background:#0f0f0f; padding:0 6px; border-radius:6px; opacity:1}
+
+    /* ==========================
+       FOOTER
+       ========================== */
+    footer{padding:56px 20px; background:#000; border-top:1px solid rgba(255,255,255,.08); text-align:center}
+
+    /* ==========================
+       REDUCED MOTION
+       ========================== */
+    @media (prefers-reduced-motion: reduce){
+      .slides, .layer, .card, .tilt{transition:none!important}
+      #fizzCanvas{display:none}
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="nav" aria-label="Primary">
+    <a class="brand" href="#home" aria-label="Brand">
+      <span class="swash">Coke</span> <span>Inspired</span>
+    </a>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#products">Products</a></li>
+      <li><a href="#history">History</a></li>
+      <li><a href="#campaigns">Campaigns</a></li>
+      <li><a href="#sustainability">Sustainability</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="cta" data-fizz id="soundToggle" aria-pressed="false">Sound: Off</button>
+  </nav>
+
+  <!-- HERO / PARALLAX -->
+  <header id="home" class="hero" aria-label="Hero">
+    <canvas id="fizzCanvas" aria-hidden="true"></canvas>
+    <div class="bg-grad"></div>
+    <div class="parallax" aria-hidden="true">
+      <!-- HD/3D placeholder images: royalty-free Unsplash links (replace with your assets) -->
+      <img class="layer" data-depth="0.15" alt="Backdrop glow" style="inset:auto; top:10%; left:-10%; width:60vw; opacity:.25" src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1600&auto=format&fit=crop"/>
+      <img class="layer" data-depth="0.35" alt="3D bottle closeup" style="right:6%; bottom:8%; width:min(420px,32vw)" src="https://images.unsplash.com/photo-1541976076758-347942db197f?q=80&w=1200&auto=format&fit=crop"/>
+      <img class="layer" data-depth="0.28" alt="Ice macro" style="left:6%; bottom:4%; width:min(380px,30vw); opacity:.9" src="https://images.unsplash.com/photo-1524594227084-4d62c256c2aa?q=80&w=1200&auto=format&fit=crop"/>
+    </div>
+    <div class="hero-content container">
+      <p class="tag" aria-label="Tag">Refreshing since 1886*</p>
+      <h1 class="headline">Taste the Feeling — <span style="color:var(--coke-red); text-shadow:0 10px 30px rgba(244,0,9,.35)">Coke‑Inspired</span> Experience</h1>
+      <p class="sub">Parallax 3D visuals, HD images, fizzy micro‑interactions, and buttery GSAP animations. Built for mobile and desktop.</p>
+      <div style="display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap">
+        <a class="cta" data-fizz href="#products">Explore Products</a>
+        <a class="cta ghost" data-fizz href="#history">See the Timeline</a>
+      </div>
+      <p class="muted" style="margin-top:.8rem;font-size:.8rem">*Brand‑inspired demo. Not affiliated with or endorsed by The Coca‑Cola Company.</p>
+    </div>
+    <!-- Three.js 3D can placeholder -->
+    <div id="threeMount" class="layer" data-depth="0.22" style="right:50%; top:18%; width:min(480px,40vw); height:min(480px,40vw)"></div>
+  </header>
+
+  <!-- PRODUCTS -->
+  <section id="products" aria-labelledby="products-title">
+    <div class="container">
+      <h2 id="products-title" class="section-title">Products</h2>
+      <p class="section-sub muted">A showcase of classic and zero‑sugar styles. Real HD placeholders included — replace with your own product shots.</p>
+      <div class="filters" role="tablist" aria-label="Filter products">
+        <button class="chip" data-filter="all" aria-selected="true">All</button>
+        <button class="chip" data-filter="classic">Classic</button>
+        <button class="chip" data-filter="zero">Zero</button>
+        <button class="chip" data-filter="mini">Mini</button>
+      </div>
+
+      <div class="grid products" id="productGrid">
+        <!-- Card templates (replace images with real HD shots) -->
+        <article class="card tilt" data-cat="classic" aria-label="Classic Can">
+          <div class="thumb">
+            <img src="https://images.unsplash.com/photo-1600275669283-4a56a4b3dc73?q=80&w=1600&auto=format&fit=crop" alt="Classic red can on ice" loading="lazy"/>
+          </div>
+          <h3>Classic Can</h3>
+          <p class="price">₹40</p>
+          <button class="cta buy" data-fizz data-sound="hover">Buy Now</button>
+        </article>
+
+        <article class="card tilt" data-cat="zero" aria-label="Zero Sugar">
+          <div class="thumb">
+            <img src="https://images.unsplash.com/photo-1613478223719-2f5a5e5b947e?q=80&w=1600&auto=format&fit=crop" alt="Zero sugar sleek black can" loading="lazy"/>
+          </div>
+          <h3>Zero Sugar</h3>
+          <p class="price">₹45</p>
+          <button class="cta buy" data-fizz data-sound="hover">Buy Now</button>
+        </article>
+
+        <article class="card tilt" data-cat="classic" aria-label="Glass Bottle">
+          <div class="thumb">
+            <img src="https://images.unsplash.com/photo-1551446339-223e7b36e6e1?q=80&w=1600&auto=format&fit=crop" alt="Glass bottle with condensation" loading="lazy"/>
+          </div>
+          <h3>Glass Bottle</h3>
+          <p class="price">₹55</p>
+          <button class="cta buy" data-fizz data-sound="hover">Buy Now</button>
+        </article>
+
+        <article class="card tilt" data-cat="mini" aria-label="Mini Can">
+          <div class="thumb">
+            <img src="https://images.unsplash.com/photo-1571450669793-39f66a31a2a4?q=80&w=1600&auto=format&fit=crop" alt="Mini can closeup" loading="lazy"/>
+          </div>
+          <h3>Mini Can</h3>
+          <p class="price">₹30</p>
+          <button class="cta buy" data-fizz data-sound="hover">Buy Now</button>
+        </article>
+
+        <article class="card tilt" data-cat="classic" aria-label="Bottle Pack">
+          <div class="thumb">
+            <img src="https://images.unsplash.com/photo-1542444459-db63c4a9a04f?q=80&w=1600&auto=format&fit=crop" alt="Pack of bottles on ice" loading="lazy"/>
+          </div>
+          <h3>Glass Pack</h3>
+          <p class="price">₹220</p>
+          <button class="cta buy" data-fizz data-sound="hover">Buy Now</button>
+        </article>
+
+        <article class="card tilt" data-cat="zero" aria-label="Zero Bottle">
+          <div class="thumb">
+            <img src="https://images.unsplash.com/photo-1598514982682-5c1b9d3170f2?q=80&w=1600&auto=format&fit=crop" alt="Zero sugar bottle macro" loading="lazy"/>
+          </div>
+          <h3>Zero Bottle</h3>
+          <p class="price">₹60</p>
+          <button class="cta buy" data-fizz data-sound="hover">Buy Now</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY TIMELINE -->
+  <section id="history" aria-labelledby="history-title">
+    <div class="container">
+      <h2 id="history-title" class="section-title">History Timeline</h2>
+      <p class="section-sub muted">Milestones that shaped a global icon (demo content with HD poster placeholders).</p>
+      <div class="timeline">
+        <div class="event left">
+          <span class="dot" aria-hidden="true"></span>
+          <article class="card">
+            <h3>1886 — The Beginning</h3>
+            <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=1200&auto=format&fit=crop" alt="Vintage soda poster"/>
+            <p>An Atlanta pharmacist formulates a caramel drink that would soon conquer taste buds worldwide.</p>
+          </article>
+        </div>
+        <div class="event right">
+          <span class="dot" aria-hidden="true"></span>
+          <article class="card">
+            <h3>1915 — Contour Bottle</h3>
+            <img src="https://images.unsplash.com/photo-1524594081293-190a2fe0baae?q=80&w=1200&auto=format&fit=crop" alt="Contour bottle silhouette"/>
+            <p>The distinct contour bottle debuts, becoming a tactile and visual hallmark recognized across the globe.</p>
+          </article>
+        </div>
+        <div class="event left">
+          <span class="dot" aria-hidden="true"></span>
+          <article class="card">
+            <h3>1971 — “Hilltop” Ad</h3>
+            <img src="https://images.unsplash.com/photo-1524594227084-4d62c256c2aa?q=80&w=1200&auto=format&fit=crop" alt="Retro TV ad still"/>
+            <p>“I’d Like to Buy the World a Coke” resonates with a generation, blending music, optimism, and brand ethos.</p>
+          </article>
+        </div>
+        <div class="event right">
+          <span class="dot" aria-hidden="true"></span>
+          <article class="card">
+            <h3>2005 — Zero Sugar</h3>
+            <img src="https://images.unsplash.com/photo-1613478223719-2f5a5e5b947e?q=80&w=1200&auto=format&fit=crop" alt="Modern can design"/>
+            <p>A modern classic: bold taste with no sugar, expanding the portfolio for evolving preferences.</p>
+          </article>
+        </div>
+        <div class="event left">
+          <span class="dot" aria-hidden="true"></span>
+          <article class="card">
+            <h3>Today — Sustainability</h3>
+            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop" alt="Recycling and environment"/>
+            <p>From recyclable packaging to water stewardship, sustainability drives innovation and community impact.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMPAIGNS -->
+  <section id="campaigns" aria-labelledby="campaigns-title">
+    <div class="container">
+      <h2 id="campaigns-title" class="section-title">Campaigns</h2>
+      <p class="section-sub muted">Video slider with parallax banners and poster fallbacks.</p>
+      <div class="slider" id="campaignSlider" aria-roledescription="carousel" aria-label="Campaign videos">
+        <div class="slides" id="slides">
+          <div class="slide" role="group" aria-roledescription="slide" aria-label="1 of 3">
+            <video muted loop playsinline poster="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop">
+              <source src="https://cdn.coverr.co/videos/coverr-pouring-soda-1582/1080p.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="slide" role="group" aria-roledescription="slide" aria-label="2 of 3">
+            <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=1600&auto=format&fit=crop" alt="Poster montage"/>
+          </div>
+          <div class="slide" role="group" aria-roledescription="slide" aria-label="3 of 3">
+            <video muted loop playsinline poster="https://images.unsplash.com/photo-1516595437895-3e28c1f6ca47?q=80&w=1600&auto=format&fit=crop">
+              <source src="https://cdn.coverr.co/videos/coverr-bubbles-1431/1080p.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+      <div class="slider-controls" aria-label="Carousel controls">
+        <button class="cta ghost" id="prevSlide">Prev</button>
+        <button class="cta" id="nextSlide">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUSTAINABILITY -->
+  <section id="sustainability" aria-labelledby="sustainability-title">
+    <div class="container">
+      <h2 id="sustainability-title" class="section-title">Sustainability</h2>
+      <p class="section-sub muted">Animated counters and infographic accents with a green twist on the palette.</p>
+      <div class="grid" style="grid-template-columns:repeat(12,1fr)">
+        <div class="s-card" style="grid-column:span 4">
+          <p class="muted">Water Replenished</p>
+          <div class="counter" data-target="120">0</div>
+          <p class="muted">million liters</p>
+        </div>
+        <div class="s-card" style="grid-column:span 4">
+          <p class="muted">Recycled Material</p>
+          <div class="counter" data-target="85">0</div>
+          <p class="muted">% in packaging</p>
+        </div>
+        <div class="s-card" style="grid-column:span 4">
+          <p class="muted">Communities Supported</p>
+          <div class="counter" data-target="250">0</div>
+          <p class="muted">projects</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" aria-labelledby="contact-title">
+    <div class="container">
+      <h2 id="contact-title" class="section-title">Get in touch</h2>
+      <p class="section-sub muted">This is a demo. Replace with your real content, payments, or CMS. Brand‑inspired only.</p>
+      <div class="contact">
+        <form id="contactForm" novalidate>
+          <div class="field">
+            <input id="name" name="name" placeholder=" " required />
+            <label for="name">Your Name</label>
+          </div>
+          <div class="field">
+            <input id="email" name="email" type="email" placeholder=" " required />
+            <label for="email">Email</label>
+          </div>
+          <div class="field">
+            <textarea id="message" name="message" rows="5" placeholder=" " required></textarea>
+            <label for="message">Message</label>
+          </div>
+          <button class="cta" type="submit" data-fizz>Send</button>
+          <p id="formStatus" class="muted" role="status" aria-live="polite"></p>
+        </form>
+        <div id="map" class="map" role="img" aria-label="Map showing our location"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p class="muted">© <span id="year"></span> Coke‑Inspired Demo • Not affiliated with The Coca‑Cola Company.</p>
+    </div>
+  </footer>
+
+  <script>
+  /* =====================================================
+     APP.JS — interactions, parallax, fizz, audio, 3D, etc.
+     ===================================================== */
+  const $ = (sel, parent=document) => parent.querySelector(sel);
+  const $$ = (sel, parent=document) => Array.from(parent.querySelectorAll(sel));
+  const clamp = (v,min,max)=>Math.min(max,Math.max(min,v));
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // YEAR
+  $('#year').textContent = new Date().getFullYear();
+
+  // SOUND TOGGLE (Howler)
+  let soundEnabled = false;
+  const fizzSound = new Howl({
+    src:[
+      'https://cdn.pixabay.com/download/audio/2022/03/15/audio_6ce7c1c6ad.mp3?filename=soda-fizz-1-18238.mp3'
+    ], volume:0.25, preload:true
+  });
+  const popSound = new Howl({
+    src:[
+      'https://cdn.pixabay.com/download/audio/2021/08/09/audio_3a0b43f4a5.mp3?filename=pop-2-36941.mp3'
+    ], volume:0.2, preload:true
+  });
+  const soundBtn = $('#soundToggle');
+  soundBtn?.addEventListener('click', ()=>{
+    soundEnabled = !soundEnabled;
+    soundBtn.textContent = 'Sound: ' + (soundEnabled ? 'On' : 'Off');
+    soundBtn.setAttribute('aria-pressed', String(soundEnabled));
+  });
+
+  // FIZZ AT POSITION (micro-interaction)
+  function fizzAt(x,y){
+    for(let i=0;i<12;i++){
+      const s = document.createElement('span');
+      s.className = 'bubble';
+      const size = Math.random()*12 + 6;
+      Object.assign(s.style,{
+        position:'absolute',width:size+'px',height:size+'px',borderRadius:'50%',
+        left:(x + (Math.random()*36 - 18))+'px', top:(y + (Math.random()*16 - 8))+'px',
+        background:'radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.35) 60%, rgba(255,255,255,0) 70%)',
+        mixBlendMode:'screen', opacity:.9, pointerEvents:'none',
+        animation:`rise ${Math.random()*1.2+.8}s ease-out forwards`
+      });
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(), 1800);
+    }
+  }
+  $$("[data-fizz]").forEach(el=>{
+    el.addEventListener('click', e=>{
+      const r = el.getBoundingClientRect();
+      fizzAt(r.left + r.width/2, r.top + window.scrollY);
+      if(soundEnabled) popSound.play();
+    });
+    if(el.dataset.sound==='hover'){
+      el.addEventListener('mouseenter', ()=> soundEnabled && fizzSound.play());
+    }
+  });
+
+  // PARALLAX (on scroll)
+  const depthNodes = $$('[data-depth]');
+  function onScroll(){
+    const y = window.scrollY || 0;
+    depthNodes.forEach(el=>{
+      const d = parseFloat(el.getAttribute('data-depth')) || 0.2;
+      el.style.transform = `translate3d(0, ${y * d * -0.15}px, 0)`;
+    })
+  }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  // GSAP ENTRANCES
+  if(!prefersReduced){
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.from('.headline',{y:30, opacity:0, duration:1});
+    gsap.utils.toArray('section').forEach((sec,i)=>{
+      gsap.from(sec.querySelector('.section-title'),{scrollTrigger:{trigger:sec,start:'top 80%'}, y:20, opacity:0});
+      gsap.from(sec.querySelectorAll('.card, .s-card'),{scrollTrigger:{trigger:sec,start:'top 70%'}, y:30, opacity:0, stagger:0.1});
+    });
+  }
+
+  // CANVAS FIZZ BACKGROUND
+  const fizz = $('#fizzCanvas');
+  const ctx = fizz.getContext('2d');
+  let particles=[]; let rafId=null; let last=0;
+  function resize(){ fizz.width = innerWidth; fizz.height = innerHeight }
+  window.addEventListener('resize', resize); resize();
+  function spawn(n){
+    for(let i=0;i<n;i++){
+      particles.push({x:Math.random()*fizz.width, y:fizz.height+Math.random()*60, r:Math.random()*2+0.8, v:- (Math.random()*0.6+0.4), a:Math.random()*Math.PI*2})
+    }
+  }
+  function loop(t){
+    const dt = Math.min(33, t-last || 16); last = t;
+    ctx.clearRect(0,0,fizz.width,fizz.height);
+    ctx.globalCompositeOperation='lighter';
+    particles.forEach(p=>{
+      p.y += p.v * (dt*0.06); p.x += Math.sin(p.a+=0.02)*0.4;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      const g = ctx.createRadialGradient(p.x-0.6,p.y-0.6,0,p.x,p.y,p.r*1.6);
+      g.addColorStop(0,'rgba(255,255,255,.9)'); g.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=g; ctx.fill();
+    });
+    particles = particles.filter(p=>p.y>-20);
+    if(particles.length<240) spawn(6);
+    rafId = requestAnimationFrame(loop);
+  }
+  if(!prefersReduced){ spawn(180); loop(0); }
+
+  // PRODUCTS: FILTERS + TILT
+  const chips = $$('.chip');
+  const cards = $$('#productGrid .card');
+  chips.forEach(ch=>ch.addEventListener('click',()=>{
+    chips.forEach(c=>c.setAttribute('aria-selected','false'));
+    ch.setAttribute('aria-selected','true');
+    const f = ch.dataset.filter;
+    cards.forEach(card=>{
+      card.style.display = (f==='all' || card.dataset.cat===f) ? '' : 'none';
+    });
+  }));
+  // tilt
+  cards.forEach(card=>{
+    card.addEventListener('mousemove', (e)=>{
+      const r = card.getBoundingClientRect();
+      const rx = (e.clientY - r.top) / r.height - .5;
+      const ry = (e.clientX - r.left) / r.width - .5;
+      card.style.transform = `rotateX(${clamp(-rx*8,-10,10)}deg) rotateY(${clamp(ry*10,-10,10)}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', ()=> card.style.transform='');
+  });
+
+  // SLIDER (Campaigns)
+  const slides = $('#slides');
+  const total = slides.children.length; let idx=0;
+  function go(i){ idx=(i+total)%total; slides.style.transform = `translateX(-${idx*100}%)`; }
+  $('#prevSlide').addEventListener('click', ()=> go(idx-1));
+  $('#nextSlide').addEventListener('click', ()=> go(idx+1));
+  let auto = setInterval(()=>go(idx+1), 6000);
+  ['mouseenter','focusin'].forEach(ev=>slides.addEventListener(ev, ()=>clearInterval(auto)));
+  ['mouseleave','focusout'].forEach(ev=>slides.addEventListener(ev, ()=> auto=setInterval(()=>go(idx+1),6000)));
+
+  // SUSTAINABILITY COUNTERS
+  const counters = $$('.counter');
+  function animateCounters(){
+    counters.forEach(el=>{
+      const target = +el.dataset.target; let cur=0; const inc = Math.max(1, Math.round(target/60));
+      const i=setInterval(()=>{ cur+=inc; if(cur>=target){cur=target; clearInterval(i);} el.textContent = cur; }, 30);
+    });
+  }
+  if(!prefersReduced){
+    ScrollTrigger.create({trigger:'#sustainability', start:'top 70%', once:true, onEnter:animateCounters});
+  } else { animateCounters(); }
+
+  // CONTACT FORM (fake submit)
+  $('#contactForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const ok = $('#name').value && $('#email').value && $('#message').value;
+    $('#formStatus').textContent = ok ? 'Message sent! (demo)' : 'Please complete all fields.';
+  });
+
+  // MAP (Leaflet)
+  const map = L.map('map', {scrollWheelZoom:false}).setView([19.076, 72.8777], 11); // Mumbai sample
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(map);
+  L.marker([19.076,72.8777]).addTo(map).bindPopup('We are here (demo)').openPopup();
+
+  // THREE.JS — Rotating Can (primitive)
+  const threeMount = $('#threeMount');
+  if(threeMount && !prefersReduced){
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, threeMount.clientWidth/threeMount.clientHeight, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
+    renderer.setSize(threeMount.clientWidth, threeMount.clientHeight); threeMount.appendChild(renderer.domElement);
+    const light = new THREE.DirectionalLight(0xffffff, 1.2); light.position.set(5,6,5); scene.add(light);
+    const amb = new THREE.AmbientLight(0xffffff, .6); scene.add(amb);
+
+    // Can = cylinder + top/bottom
+    const texLoader = new THREE.TextureLoader();
+    const labelTex = texLoader.load('https://images.unsplash.com/photo-1600275669283-4a56a4b3dc73?q=80&w=1200&auto=format&fit=crop');
+    labelTex.wrapS = labelTex.wrapT = THREE.RepeatWrapping; labelTex.repeat.set(1,1);
+    const geo = new THREE.CylinderGeometry(1,1,2.2, 48, 1, true);
+    const mat = new THREE.MeshStandardMaterial({map:labelTex, metalness:.4, roughness:.35});
+    const can = new THREE.Mesh(geo, mat); scene.add(can);
+    const top = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshStandardMaterial({color:0xcfd3d6, metalness:.8, roughness:.2})); top.rotation.x = -Math.PI/2; top.position.y=1.1; scene.add(top);
+    const bottom = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshStandardMaterial({color:0xcfd3d6, metalness:.8, roughness:.2})); bottom.rotation.x = Math.PI/2; bottom.position.y=-1.1; scene.add(bottom);
+    camera.position.set(0,0,6);
+
+    function animate(){ can.rotation.y += 0.01; renderer.render(scene, camera); requestAnimationFrame(animate); }
+    animate();
+    addEventListener('resize', ()=>{
+      const w = threeMount.clientWidth, h = threeMount.clientHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+    });
+  }
+  </script>
+
+  <style>
+    /* Animation keyframes appended at end to keep CSS modular */
+    @keyframes rise{from{transform:translateY(0) scale(.9);opacity:1}to{transform:translateY(-160px) scale(1.15);opacity:0}}
+  </style>
+</body>
+</html>
