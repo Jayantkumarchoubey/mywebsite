@@ -6,14 +6,14 @@
 
 <style>
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background: #0f172a;
     color: white;
     text-align: center;
 }
 
 .container {
-    margin-top: 40px;
+    margin-top: 30px;
 }
 
 input {
@@ -25,18 +25,17 @@ input {
 }
 
 button {
-    padding: 10px 15px;
-    margin: 5px;
+    padding: 10px 20px;
+    margin: 10px;
     border: none;
     border-radius: 5px;
+    background: #22c55e;
     cursor: pointer;
-    background: #38bdf8;
-    color: black;
     font-weight: bold;
 }
 
 button:hover {
-    background: #0ea5e9;
+    background: #16a34a;
 }
 
 .output {
@@ -46,11 +45,17 @@ button:hover {
     background: #1e293b;
     padding: 20px;
     border-radius: 10px;
-    max-width: 600px;
+    width: 650px;
 }
 
-.step {
-    margin: 5px 0;
+h2 {
+    color: #38bdf8;
+}
+
+.best {
+    color: #facc15;
+    font-size: 20px;
+    margin-top: 15px;
 }
 </style>
 </head>
@@ -65,34 +70,23 @@ button:hover {
     <input type="number" id="frames" placeholder="Enter number of frames">
 
     <br>
-
-    <button onclick="runFIFO()">FIFO</button>
-    <button onclick="runLRU()">LRU</button>
-    <button onclick="runOptimal()">Optimal</button>
+    <button onclick="runAll()">Run All Algorithms</button>
 
     <div class="output" id="output"></div>
 </div>
 
 <script>
+
 function getInput() {
     let pages = document.getElementById("pages").value.split(" ").map(Number);
     let frames = parseInt(document.getElementById("frames").value);
     return { pages, frames };
 }
 
-function display(title, steps, faults) {
-    let output = `<h2>${title}</h2>`;
-    steps.forEach(s => output += `<div class="step">${s}</div>`);
-    output += `<h3>Total Page Faults: ${faults}</h3>`;
-    document.getElementById("output").innerHTML = output;
-}
-
 /* FIFO */
-function runFIFO() {
-    let { pages, frames } = getInput();
+function fifo(pages, frames) {
     let frame = Array(frames).fill(-1);
     let index = 0, faults = 0;
-    let steps = [];
 
     pages.forEach(p => {
         if (!frame.includes(p)) {
@@ -100,19 +94,16 @@ function runFIFO() {
             index = (index + 1) % frames;
             faults++;
         }
-        steps.push(`Page ${p} → ${frame.join(" ")}`);
     });
 
-    display("FIFO", steps, faults);
+    return faults;
 }
 
 /* LRU */
-function runLRU() {
-    let { pages, frames } = getInput();
+function lru(pages, frames) {
     let frame = Array(frames).fill(-1);
     let time = Array(frames).fill(0);
     let counter = 0, faults = 0;
-    let steps = [];
 
     pages.forEach(p => {
         let idx = frame.indexOf(p);
@@ -129,19 +120,15 @@ function runLRU() {
             time[pos] = counter;
             faults++;
         }
-
-        steps.push(`Page ${p} → ${frame.join(" ")}`);
     });
 
-    display("LRU", steps, faults);
+    return faults;
 }
 
 /* Optimal */
-function runOptimal() {
-    let { pages, frames } = getInput();
+function optimal(pages, frames) {
     let frame = Array(frames).fill(-1);
     let faults = 0;
-    let steps = [];
 
     for (let i = 0; i < pages.length; i++) {
         let p = pages[i];
@@ -172,12 +159,40 @@ function runOptimal() {
             frame[pos] = p;
             faults++;
         }
-
-        steps.push(`Page ${p} → ${frame.join(" ")}`);
     }
 
-    display("Optimal", steps, faults);
+    return faults;
 }
+
+/* RUN ALL + COMPARISON */
+function runAll() {
+    let { pages, frames } = getInput();
+
+    let fifoFaults = fifo(pages, frames);
+    let lruFaults = lru(pages, frames);
+    let optFaults = optimal(pages, frames);
+
+    let best = "";
+
+    if (optFaults <= lruFaults && optFaults <= fifoFaults)
+        best = "Optimal";
+    else if (lruFaults <= fifoFaults)
+        best = "LRU";
+    else
+        best = "FIFO";
+
+    let output = `
+        <h2>Comparison Result</h2>
+        FIFO Faults : ${fifoFaults} <br>
+        LRU Faults : ${lruFaults} <br>
+        Optimal Faults : ${optFaults} <br>
+
+        <div class="best">Best Algorithm: ${best}</div>
+    `;
+
+    document.getElementById("output").innerHTML = output;
+}
+
 </script>
 
 </body>
