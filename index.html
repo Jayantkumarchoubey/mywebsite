@@ -1,178 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For My Love 💖</title>
-  <style>
-    /* ========== RESET & BASE ========== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<title>Page Replacement Simulator</title>
 
-    body {
-      height: 100vh;
-      font-family: "Poppins", sans-serif;
-      background: radial-gradient(circle at bottom, #ff9a9e 0%, #fad0c4 100%);
-      overflow: hidden;
-      color: white;
-      text-align: center;
-    }
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
 
-    h1 {
-      font-size: 3rem;
-      margin-top: 100px;
-      letter-spacing: 2px;
-      animation: glow 2s infinite alternate;
-    }
+.container {
+    margin-top: 40px;
+}
 
-    @keyframes glow {
-      from { text-shadow: 0 0 10px #fff, 0 0 20px #ffafbd, 0 0 30px #ffc3a0; }
-      to { text-shadow: 0 0 20px #fff, 0 0 30px #ffafbd, 0 0 40px #ffc3a0; }
-    }
+input {
+    padding: 10px;
+    margin: 10px;
+    width: 250px;
+    border-radius: 5px;
+    border: none;
+}
 
-    p {
-      font-size: 1.2rem;
-      max-width: 700px;
-      margin: 30px auto;
-      line-height: 1.8;
-    }
+button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #38bdf8;
+    color: black;
+    font-weight: bold;
+}
 
-    /* ========== BUTTON STYLES ========== */
-    .button {
-      margin-top: 40px;
-      padding: 12px 40px;
-      border: none;
-      border-radius: 50px;
-      background: linear-gradient(90deg, #ff758c, #ff7eb3);
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(255, 118, 136, 0.6);
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
-    }
+button:hover {
+    background: #0ea5e9;
+}
 
-    .button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(255, 118, 136, 0.9);
-    }
+.output {
+    margin-top: 20px;
+    text-align: left;
+    display: inline-block;
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+}
 
-    /* ========== HEART ANIMATION ========== */
-    .heart {
-      position: absolute;
-      color: #ffdde1;
-      font-size: 20px;
-      opacity: 0.8;
-      animation: float 6s linear infinite;
-    }
-
-    @keyframes float {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100vh) scale(1.3);
-        opacity: 0;
-      }
-    }
-
-    /* ========== MESSAGE POPUP ========== */
-    .message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-      color: #fff;
-      font-size: 1.5rem;
-      width: 80%;
-      max-width: 500px;
-      line-height: 1.8;
-      opacity: 0;
-      transition: all 0.5s ease;
-    }
-
-    .message.show {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-    }
-
-    /* Floating sparkles */
-    .sparkle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: white;
-      border-radius: 50%;
-      animation: sparkle 3s linear infinite;
-    }
-
-    @keyframes sparkle {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-100vh) scale(0); opacity: 0; }
-    }
-  </style>
+.step {
+    margin: 5px 0;
+}
+</style>
 </head>
+
 <body>
 
-  <h1>💖 For My Beautiful Girlfriend 💖</h1>
-  <p>
-    You are the reason my world feels brighter every single day.<br>
-    Every heartbeat whispers your name, and every breeze reminds me of your smile.<br>
-    This little website is my way of saying — you mean everything to me.
-  </p>
-  <button class="button" onclick="showMessage()">Click for a Surprise 💌</button>
+<div class="container">
+    <h1>Page Replacement Simulator</h1>
 
-  <div class="message" id="loveMessage">
-    🌸 Every moment with you feels like magic.<br><br>
-    You make my world softer, my smile wider, and my heart fuller.<br><br>
-    I love you more than words can say. 💞
-  </div>
+    <input type="text" id="pages" placeholder="Enter pages (e.g. 1 2 3 4 1 2)">
+    <br>
+    <input type="number" id="frames" placeholder="Enter number of frames">
 
-  <script>
-    // Generate floating hearts
-    const body = document.body;
-    const colors = ['#ffb6c1', '#ff69b4', '#ffc1cc', '#ff9a9e', '#fad0c4'];
+    <br>
 
-    function createHeart() {
-      const heart = document.createElement('div');
-      heart.classList.add('heart');
-      heart.innerHTML = '❤';
-      heart.style.left = Math.random() * 100 + 'vw';
-      heart.style.fontSize = Math.random() * 20 + 15 + 'px';
-      heart.style.color = colors[Math.floor(Math.random() * colors.length)];
-      heart.style.animationDuration = Math.random() * 3 + 3 + 's';
-      body.appendChild(heart);
-      setTimeout(() => heart.remove(), 6000);
+    <button onclick="runFIFO()">FIFO</button>
+    <button onclick="runLRU()">LRU</button>
+    <button onclick="runOptimal()">Optimal</button>
+
+    <div class="output" id="output"></div>
+</div>
+
+<script>
+function getInput() {
+    let pages = document.getElementById("pages").value.split(" ").map(Number);
+    let frames = parseInt(document.getElementById("frames").value);
+    return { pages, frames };
+}
+
+function display(title, steps, faults) {
+    let output = `<h2>${title}</h2>`;
+    steps.forEach(s => output += `<div class="step">${s}</div>`);
+    output += `<h3>Total Page Faults: ${faults}</h3>`;
+    document.getElementById("output").innerHTML = output;
+}
+
+/* FIFO */
+function runFIFO() {
+    let { pages, frames } = getInput();
+    let frame = Array(frames).fill(-1);
+    let index = 0, faults = 0;
+    let steps = [];
+
+    pages.forEach(p => {
+        if (!frame.includes(p)) {
+            frame[index] = p;
+            index = (index + 1) % frames;
+            faults++;
+        }
+        steps.push(`Page ${p} → ${frame.join(" ")}`);
+    });
+
+    display("FIFO", steps, faults);
+}
+
+/* LRU */
+function runLRU() {
+    let { pages, frames } = getInput();
+    let frame = Array(frames).fill(-1);
+    let time = Array(frames).fill(0);
+    let counter = 0, faults = 0;
+    let steps = [];
+
+    pages.forEach(p => {
+        let idx = frame.indexOf(p);
+
+        if (idx !== -1) {
+            counter++;
+            time[idx] = counter;
+        } else {
+            let min = Math.min(...time);
+            let pos = time.indexOf(min);
+
+            frame[pos] = p;
+            counter++;
+            time[pos] = counter;
+            faults++;
+        }
+
+        steps.push(`Page ${p} → ${frame.join(" ")}`);
+    });
+
+    display("LRU", steps, faults);
+}
+
+/* Optimal */
+function runOptimal() {
+    let { pages, frames } = getInput();
+    let frame = Array(frames).fill(-1);
+    let faults = 0;
+    let steps = [];
+
+    for (let i = 0; i < pages.length; i++) {
+        let p = pages[i];
+
+        if (!frame.includes(p)) {
+            let pos = -1, farthest = i + 1;
+
+            for (let j = 0; j < frames; j++) {
+                let k;
+                for (k = i + 1; k < pages.length; k++) {
+                    if (frame[j] === pages[k]) {
+                        if (k > farthest) {
+                            farthest = k;
+                            pos = j;
+                        }
+                        break;
+                    }
+                }
+
+                if (k === pages.length) {
+                    pos = j;
+                    break;
+                }
+            }
+
+            if (pos === -1) pos = 0;
+
+            frame[pos] = p;
+            faults++;
+        }
+
+        steps.push(`Page ${p} → ${frame.join(" ")}`);
     }
 
-    setInterval(createHeart, 300);
-
-    // Floating sparkles
-    function createSparkle() {
-      const sparkle = document.createElement('div');
-      sparkle.classList.add('sparkle');
-      sparkle.style.left = Math.random() * 100 + 'vw';
-      sparkle.style.top = Math.random() * 100 + 'vh';
-      sparkle.style.animationDuration = Math.random() * 2 + 2 + 's';
-      body.appendChild(sparkle);
-      setTimeout(() => sparkle.remove(), 3000);
-    }
-
-    setInterval(createSparkle, 150);
-
-    // Surprise message
-    function showMessage() {
-      document.getElementById('loveMessage').classList.add('show');
-    }
-  </script>
+    display("Optimal", steps, faults);
+}
+</script>
 
 </body>
 </html>
